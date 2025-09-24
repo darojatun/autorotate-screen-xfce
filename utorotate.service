@@ -1,0 +1,14 @@
+# Buat file: /etc/systemd/system/autorotate.service
+[Unit]
+Description=Auto Rotate Screen
+After=graphical-session.target
+
+[Service]
+Type=simple
+User=tukang
+ExecStart=/home/tukang/autorotate.sh
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=graphical-session.target   
