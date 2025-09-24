@@ -1,116 +1,112 @@
-XFCE Auto Rotate Screen Script with Touchscreen Support
-This repository contains a script to automatically rotate the screen and synchronize touchscreen input on XFCE desktop environments, ideal for 2-in-1 laptops and convertible devices.
+Berikut draft **README.md** untuk repositori `autorotate-screen-xfce`:
 
-Features
-Automatic screen rotation based on accelerometer data using iio-sensor-proxy
-Synchronizes touchscreen, touchpad, stylus, and other input devices with screen orientation
-Works on X11 with XFCE and other desktop environments 
-No root privileges required (depending on implementation)
-Supports manual rotation via command-line arguments
-Prerequisites
-Install the required packages:
+````markdown
+# Autorotate Screen XFCE (dan Window Manager lain)
 
-# On Debian/Ubuntu-based systems
-sudo apt install xrandr xinput iio-sensor-proxy
+Script sederhana untuk **memutar layar (screen rotation) secara otomatis** berdasarkan sensor orientasi, sekaligus menyesuaikan **layar sentuh (touchscreen input)** agar tetap akurat.  
+Cocok digunakan di **XFCE** maupun window manager lain yang tidak punya fitur autorotate bawaan.
 
-# On Arch Linux
-sudo pacman -S xrandr xinput iio-sensor-proxy
+---
 
-# On Alpine Linux
-sudo apk add xrandr xinput
+## 📦 Dependensi
 
-Ensure your system has an accelerometer and that iio-sensor-proxy is running. You can test it with:
+Pastikan paket berikut sudah terpasang di sistem Anda:
 
-monitor-sensor
+- [`iio-sensor-proxy`](https://github.com/hadess/iio-sensor-proxy) → membaca sensor orientasi
+- `xrandr` → mengatur rotasi layar
+- `xinput` → menyesuaikan input touchscreen
+- `inotify-tools` → mendeteksi perubahan data sensor
 
-This should display orientation changes as you rotate your device.
+Di Debian/Ubuntu dan turunannya bisa dipasang dengan:
 
-Installation
-Option 1: Using autorotate (Recommended)
-A dedicated utility called autorotate simplifies setup:
+```bash
+sudo apt install iio-sensor-proxy x11-xserver-utils xinput inotify-tools
+````
 
-# Download and extract
-wget https://github.com/undg/autorotate/releases/latest/download/autorotate.zip
-unzip autorotate.zip
-cd bin/
-chmod +x autorotate
+---
 
-# Check your display name
-./autorotate list
+## ⚙️ Instalasi
 
-# Test rotation
-./autorotate left --display eDP-1
+1. Clone repo ini atau unduh file script:
 
-To run in daemon mode (auto-detect orientation):
+   ```bash
+   git clone https://github.com/darojatun/autorotate-screen-xfce.git
+   cd autorotate-screen-xfce
+   ```
 
-./autorotate --display eDP-1 --daemon
+2. Simpan script ke home directory:
 
-Add to XFCE autostart for persistent background operation.
+   ```bash
+   cp autorotate.sh ~/autorotate.sh
+   chmod +x ~/autorotate.sh
+   ```
 
-Option 2: Custom Shell Script
-Create a script using monitor-sensor and xrandr:
+---
 
-#!/bin/sh
+## 🚀 Cara Menjalankan
 
-killall monitor-sensor
-monitor-sensor > /dev/shm/sensor.log 2>&1 &
+### 1. Autostart via XFCE (Session & Startup)
 
-while inotifywait -e modify /dev/shm/sensor.log; do
-  ORIENTATION=$(tail /dev/shm/sensor.log | grep 'orientation' | tail -1 | grep -oE '[^ ]+$')
+Tambahkan `~/autorotate.sh` ke:
 
-  case "$ORIENTATION" in
-    normal)
-      xrandr -o normal
-      xinput set-prop "Your Touchscreen Name" "Coordinate Transformation Matrix" 1 0 0 0 1 0 0 0 1
-      ;;
-    left-up)
-      xrandr -o left
-      xinput set-prop "Your Touchscreen Name" "Coordinate Transformation Matrix" 0 -1 1 1 0 0 0 0 1
-      ;;
-    bottom-up)
-      xrandr -o inverted
-      xinput set-prop "Your Touchscreen Name" "Coordinate Transformation Matrix" -1 0 1 0 -1 1 0 0 1
-      ;;
-    right-up)
-      xrandr -o right
-      xinput set-prop "Your Touchscreen Name" "Coordinate Transformation Matrix" 0 1 0 -1 0 1 0 0 1
-      ;;
-  esac
-done
+* **Settings Manager** → **Session and Startup** → **Application Autostart**
 
-Replace "Your Touchscreen Name" with the actual device name from xinput --list.
+Sehingga script berjalan otomatis saat login.
 
-Make the script executable:
+### 2. Menjalankan via Systemd (opsional)
 
-chmod +x rotate.sh
+Contoh file service: `~/.config/systemd/user/autorotate.service`
 
-Option 3: Python-Based Rotation
-Use a Python script that interfaces with D-Bus and iio-sensor-proxy. An example implementation can be found at https://github.com/andrewrembrandt/surface-autorotate2.
+```ini
+[Unit]
+Description=Auto rotate screen and touchscreen
 
-Configuration
-Find your touchscreen device name:
-xinput --list
+[Service]
+ExecStart=%h/autorotate.sh
+Restart=always
 
-Find your display name:
-xrandr
+[Install]
+WantedBy=default.target
+```
 
-Adjust the script with your specific device names and test manually before enabling auto-start.
-Auto-Start in XFCE
-Open Settings > Session and Startup > Application Autostart
-Click Add
-Enter a name (e.g., "Auto Rotate")
-In the command field, enter the full path to your script or autorotate --display eDP-1 --daemon
-Save and reboot to test
-Troubleshooting
-If input devices don't rotate correctly, ensure the Coordinate Transformation Matrix is properly applied via xinput set-prop 
-Some touchscreens may require specific calibration or naming
-On GTK-based desktops like XFCE, using Qt-based tools like ScreenRotator may require additional Qt libraries 
-If using ScreenRotator, note that compilation on 32-bit systems may require a patch 
-Alternatives
-ScreenRotator: Qt-based automatic rotation daemon supporting XFCE, KDE, and others 
-Screen Orientation Manager: GUI tool for managing screen orientation with support for multiple DEs including XFCE 
-Credits
-Based on scripts from mildmojo 
-Auto-rotation logic inspired by postmarketOS Wiki 
-Utility design influenced by autorotate 
- and ScreenRotator 
+Aktifkan dengan:
+
+```bash
+systemctl --user enable --now autorotate.service
+```
+
+---
+
+## 🖐️ Menentukan ID Touchscreen
+
+Untuk menemukan ID touchscreen, jalankan:
+
+```bash
+xinput list
+```
+
+> ⚠️ Perintah ini **tidak bisa dijalankan via SSH** karena butuh akses X server.
+
+Lalu edit variabel `TOUCHSCREEN_ID` di dalam `autorotate.sh` sesuai dengan ID perangkat touchscreen Anda.
+
+---
+
+## 📝 Catatan
+
+* Script ini dibuat untuk sistem dengan **sensor orientasi yang didukung `iio-sensor-proxy`**.
+* Sudah diuji di XFCE, namun bisa digunakan di desktop environment lain atau window manager murni dengan syarat semua dependensi tersedia.
+
+---
+
+## 📜 Lisensi
+
+[MIT](LICENSE)
+
+---
+
+💡 Kontribusi, perbaikan, dan saran sangat diterima 🙌
+
+```
+
+Mau aku bikinkan juga contoh isi `autorotate.sh` minimalis (hanya kerangka + variabel touchscreen) supaya README lebih lengkap?
+```
