@@ -1,4 +1,3 @@
-````markdown
 # Autorotate Screen XFCE (dan Window Manager lain)
 
 Script sederhana untuk **memutar layar (screen rotation) secara otomatis** berdasarkan sensor orientasi, sekaligus menyesuaikan **layar sentuh (touchscreen input)** agar tetap akurat.  
