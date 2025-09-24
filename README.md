@@ -1,5 +1,3 @@
-Berikut draft **README.md** untuk repositori `autorotate-screen-xfce`:
-
 ````markdown
 # Autorotate Screen XFCE (dan Window Manager lain)
 
