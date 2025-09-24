@@ -81,6 +81,16 @@ Untuk menemukan ID touchscreen, jalankan:
 
 ```bash
 xinput list
+⎡ Virtual core pointer                          id=2    [master pointer  (3)]
+⎜   ↳ Virtual core XTEST pointer                id=4    [slave  pointer  (2)]
+⎜   ↳ Elan Touchpad                             id=8    [slave  pointer  (2)]
+⎜   ↳ SYTS7817:00 06CB:1A24                     id=9    [slave  pointer  (2)]
+⎣ Virtual core keyboard                         id=3    [master keyboard (2)]
+    ↳ Virtual core XTEST keyboard               id=5    [slave  keyboard (3)]
+    ↳ Power Button                              id=6    [slave  keyboard (3)]
+    ↳ Video Bus                                 id=7    [slave  keyboard (3)]
+    ↳ acpd7219m98357 Headset Jack               id=10   [slave  keyboard (3)]
+    ↳ AT Translated Set 2 keyboard              id=11   [slave  keyboard (3)]
 ```
 
 > ⚠️ Perintah ini **tidak bisa dijalankan via SSH** karena butuh akses X server.
@@ -105,6 +115,6 @@ Lalu edit variabel `TOUCHSCREEN_ID` di dalam `autorotate.sh` sesuai dengan ID pe
 💡 Kontribusi, perbaikan, dan saran sangat diterima 🙌
 
 ```
+au ah elap. ini cuma catatanku saja siapa tau kapan-kapan perlu lagi. o iya ini kudapat dari nanya AI  bawaan brower Brave dengan memberi variable yang dibutuhkan seperti hasil dari perintah monitor-sensor jika layar dibolak balik
 
-Mau aku bikinkan juga contoh isi `autorotate.sh` minimalis (hanya kerangka + variabel touchscreen) supaya README lebih lengkap?
 ```
